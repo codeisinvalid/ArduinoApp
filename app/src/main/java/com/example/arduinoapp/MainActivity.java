@@ -1,23 +1,31 @@
 package com.example.arduinoapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,12 +34,14 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice bluetoothDevice;
     BluetoothSocket bluetoothSocket;
     OutputStream outputStream;
-    Button bluetoothButton;
+    Button bluetoothButton, scanButton;
+    ListView deviceListView;
     Switch seedingSwitch;
-    ImageButton upButton, downButton, leftButton, rightButton, stopButton;
+    AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton;
+
     private boolean isConnected = false;
     private static final int REQUEST_ENABLE_BT = 1;
-
+    private static final int REQUEST_ENABLE_BT_PERMISSION = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +54,22 @@ public class MainActivity extends AppCompatActivity {
         leftButton = findViewById(R.id.leftButton);
         stopButton = findViewById(R.id.stopButton);
         seedingSwitch = findViewById(R.id.seeder);
+        scanButton = findViewById(R.id.scanBtn);
+        deviceListView = findViewById(R.id.deviceListView);
+
+
 
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 connectBluetooth();
+            }
+        });
+
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startBluetoothDeviceDiscovery();
             }
         });
 
@@ -117,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.BLUETOOTH, android.Manifest.permission.BLUETOOTH_ADMIN}, 100);
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, 100);
             return;
         }
 
@@ -137,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
                 outputStream = bluetoothSocket.getOutputStream();
                 showToast(bluetoothDevice.getName()+" connected");
                 bluetoothButton.setText("Disconnect");
+                scanButton.setVisibility(View.GONE);
+                deviceListView.setVisibility(View.GONE);
                 isConnected = true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -154,6 +177,99 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private void startBluetoothDeviceDiscovery() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            showToast("Bluetooth not supported");
+            return;
+        }
+
+        if (!bluetoothAdapter.isEnabled()) {
+            // Check if permission is granted to enable Bluetooth
+            if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                // Permissions not granted, request permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, REQUEST_ENABLE_BT_PERMISSION);
+                return;
+            }
+
+            // Permissions granted, show dialog to request enabling Bluetooth
+//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+//            return;
+        }
+        System.out.println(bluetoothAdapter.getBondedDevices());
+        ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        deviceListView.setAdapter(deviceAdapter);
+
+        // Get bonded devices
+        Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+
+        // Populate the adapter with bonded device names
+        for (BluetoothDevice device : bondedDevices) {
+            deviceAdapter.add(device.getName() + " (" + device.getAddress() + ")");
+        }
+
+        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItem = (String) parent.getItemAtPosition(position);
+
+                // Extract the device name from the selected item
+                String deviceName = selectedItem.split("\\(")[0].trim();
+
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+                        ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, 100);
+                    return;
+                }
+
+                // Iterate through bonded devices to find the device with matching name
+                for (BluetoothDevice device : bondedDevices) {
+                    if (device.getName() != null && device.getName().equals(deviceName)) {
+                        // Check if the device name matches the Bluetooth module name
+                        if (device.getName().equals("HC-05")) {
+                            // Connect to the Bluetooth module
+                            connectBluetooth();
+                        } else {
+                            // Handle the case where the selected device is not the Bluetooth module
+                            showToast("Selected device is not HC-05");
+                        }
+                        return;
+                    }
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_ENABLE_BT_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, check if Bluetooth is enabled
+                if (!bluetoothAdapter.isEnabled()) {
+                    // Check if permission is granted to enable Bluetooth
+                    if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                        // Permissions not granted, request permission
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_ADMIN}, REQUEST_ENABLE_BT_PERMISSION);
+                        return;
+                    }
+
+                    // Permissions granted, show dialog to request enabling Bluetooth
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                } else {
+                    // Bluetooth is already enabled, proceed with discovery
+                    startBluetoothDeviceDiscovery();
+                }
+            } else {
+                // Permission denied, handle accordingly
+                showToast("Permission denied to enable Bluetooth");
             }
         }
     }

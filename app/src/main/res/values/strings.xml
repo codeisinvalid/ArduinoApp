@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ArduinoApp</string>
     <string name="moisture_sensor">Moisture Sensor</string>
+    <string name="scan_for_devices">Scan for Devices</string>
 </resources>
