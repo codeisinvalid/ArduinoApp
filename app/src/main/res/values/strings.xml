@@ -2,4 +2,5 @@
     <string name="app_name">ArduinoApp</string>
     <string name="moisture_sensor">Moisture Sensor</string>
     <string name="scan_for_devices">Scan for Devices</string>
+    <string name="connect_to_hc_05">Connect to HC-05</string>
 </resources>

@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
     Button bluetoothButton, scanButton;
     ListView deviceListView;
     Switch seedingSwitch;
-    AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton;
+    ProgressBar progressBar;
+    AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton, moistureUpBtn, moistureDownBtn;
 
     private boolean isConnected = false;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -56,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
         seedingSwitch = findViewById(R.id.seeder);
         scanButton = findViewById(R.id.scanBtn);
         deviceListView = findViewById(R.id.deviceListView);
+        moistureUpBtn = findViewById(R.id.moistureUpBtn);
+        moistureDownBtn = findViewById(R.id.moistureDownBtn);
+
 
 
 
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 connectBluetooth();
+
             }
         });
 
@@ -108,6 +114,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        moistureUpBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendData("MU");
+            }
+        });
+        moistureDownBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendData("MD");
+            }
+        });
+
 
         seedingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -125,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectBluetooth() {
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             showToast("Bluetooth not supported");
@@ -148,19 +168,22 @@ public class MainActivity extends AppCompatActivity {
 
             bluetoothDevice = bluetoothAdapter.getRemoteDevice("00:22:03:01:01:52"); // Replace with your HC-05 MAC address
             if (bluetoothDevice == null) {
+
                 showToast("Bluetooth device not found");
+
                 return;
             } else System.out.println(bluetoothDevice.getName());
 
             try {
                 bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(mUUID);
                 bluetoothSocket.connect();
-                outputStream = bluetoothSocket.getOutputStream();
-                showToast(bluetoothDevice.getName()+" connected");
                 bluetoothButton.setText("Disconnect");
                 scanButton.setVisibility(View.GONE);
                 deviceListView.setVisibility(View.GONE);
                 isConnected = true;
+                outputStream = bluetoothSocket.getOutputStream();
+                showToast(bluetoothDevice.getName()+" connected");
+
             } catch (IOException e) {
                 e.printStackTrace();
                 showToast("Failed to connect Bluetooth");
@@ -172,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                     bluetoothSocket.close();
                     outputStream = null;
                     showToast("Bluetooth disconnected");
-                    bluetoothButton.setText("Connect"); // Change button text to "Connect"
+                    bluetoothButton.setText("Connect to HC-05"); // Change button text to "Connect"
                     isConnected = false; // Update connection status
                 }
             } catch (IOException e) {
@@ -196,10 +219,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Permissions granted, show dialog to request enabling Bluetooth
-//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-//            return;
         }
         System.out.println(bluetoothAdapter.getBondedDevices());
         ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
