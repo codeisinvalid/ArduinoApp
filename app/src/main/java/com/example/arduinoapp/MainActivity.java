@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothSocket bluetoothSocket;
     OutputStream outputStream;
     Button bluetoothButton;
-    ImageButton upButton, downButton, leftButton, rightButton;
+    ImageButton upButton, downButton, leftButton, rightButton, stopButton;
+    private boolean isConnected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         downButton = findViewById(R.id.downButton);
         rightButton = findViewById(R.id.rightButton);
         leftButton = findViewById(R.id.leftButton);
+        stopButton = findViewById(R.id.stopButton);
 
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,41 +72,68 @@ public class MainActivity extends AppCompatActivity {
                 sendData("R");
             }
         });
+
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendData("S");
+            }
+        });
     }
 
     private void connectBluetooth() {
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.BLUETOOTH, android.Manifest.permission.BLUETOOTH_ADMIN}, 100);
-            return;
+        if (!isConnected){
+
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.BLUETOOTH, android.Manifest.permission.BLUETOOTH_ADMIN}, 100);
+                return;
+            }
+
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null) {
+                showToast("Bluetooth not supported");
+                return;
+            }else System.out.println(bluetoothAdapter.getBondedDevices());
+
+            if (!bluetoothAdapter.isEnabled()) {
+                showToast("Bluetooth is not enabled");
+                return;
+            }
+
+            bluetoothDevice = bluetoothAdapter.getRemoteDevice("00:22:03:01:01:52"); // Replace with your HC-05 MAC address
+            if (bluetoothDevice == null) {
+                showToast("Bluetooth device not found");
+                return;
+            } else System.out.println(bluetoothDevice.getName());
+
+            try {
+                bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(mUUID);
+                bluetoothSocket.connect();
+                outputStream = bluetoothSocket.getOutputStream();
+                showToast(bluetoothDevice.getName()+" connected");
+                bluetoothButton.setText("Disconnect");
+                isConnected = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                showToast("Failed to connect Bluetooth");
+            }
+
+        } else {
+            try {
+                if (bluetoothSocket != null) {
+                    bluetoothSocket.close();
+                    outputStream = null;
+                    showToast("Bluetooth disconnected");
+                    bluetoothButton.setText("Connect"); // Change button text to "Connect"
+                    isConnected = false; // Update connection status
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            showToast("Bluetooth not supported");
-            return;
-        }
-
-        if (!bluetoothAdapter.isEnabled()) {
-            showToast("Bluetooth is not enabled");
-            return;
-        }
-
-        bluetoothDevice = bluetoothAdapter.getRemoteDevice("00:22:03:01:01:52"); // Replace with your HC-05 MAC address
-        if (bluetoothDevice == null) {
-            showToast("Bluetooth device not found");
-            return;
-        }
-
-        try {
-            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(mUUID);
-            bluetoothSocket.connect();
-            outputStream = bluetoothSocket.getOutputStream();
-            showToast("Bluetooth connected");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showToast("Failed to connect Bluetooth");
-        }
     }
 
     private void sendData(String data) {
