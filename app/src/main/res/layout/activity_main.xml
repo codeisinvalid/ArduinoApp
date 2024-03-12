@@ -9,16 +9,17 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/bluetoothBtn"
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginStart="20dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/btn_bg"
         android:text="Connect"
         android:textAllCaps="false"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controller"
@@ -28,7 +29,6 @@
         android:layout_alignParentStart="true"
         android:layout_marginStart="2dp"
         android:layout_marginTop="20dp">
-
 
         <ImageButton
             android:id="@+id/leftButton"
@@ -97,10 +97,10 @@
             app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@drawable/stop" />
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
+        android:id="@+id/moistureTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/controller"
@@ -109,9 +109,30 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:text="Moisture Check"
+        android:text="@string/moisture_sensor"
         android:textSize="24sp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/moisture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/moistureTv"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:text="" />
 
+        <Switch
+            android:id="@+id/seeder"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:text="Seeder"
+            android:textSize="24sp"
+            android:checked="false"
+            android:textStyle="bold"
+            android:layout_margin="20dp"
+            android:layout_below="@id/moisture"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 </RelativeLayout>

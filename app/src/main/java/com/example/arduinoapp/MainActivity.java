@@ -11,7 +11,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothSocket bluetoothSocket;
     OutputStream outputStream;
     Button bluetoothButton;
+    Switch seedingSwitch;
     ImageButton upButton, downButton, leftButton, rightButton, stopButton;
     private boolean isConnected = false;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         rightButton = findViewById(R.id.rightButton);
         leftButton = findViewById(R.id.leftButton);
         stopButton = findViewById(R.id.stopButton);
+        seedingSwitch = findViewById(R.id.seeder);
 
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,9 +83,24 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("S");
+                sendData("P");
             }
         });
+
+
+        seedingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // Switch is checked, send signal for seeding
+                    sendData("S");
+                } else {
+                    // Switch is unchecked
+                    // You can add handling for this scenario if needed
+                }
+            }
+        });
+
     }
 
     private void connectBluetooth() {
