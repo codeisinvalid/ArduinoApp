@@ -9,8 +9,6 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -20,7 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
+
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -37,8 +35,7 @@ public class MainActivity extends AppCompatActivity {
     OutputStream outputStream;
     Button bluetoothButton, scanButton;
     ListView deviceListView;
-    Switch seedingSwitch;
-    ProgressBar progressBar;
+    Switch seedingSwitch,waterPump;
     AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton, moistureUpBtn, moistureDownBtn;
 
     private boolean isConnected = false;
@@ -60,15 +57,12 @@ public class MainActivity extends AppCompatActivity {
         deviceListView = findViewById(R.id.deviceListView);
         moistureUpBtn = findViewById(R.id.moistureUpBtn);
         moistureDownBtn = findViewById(R.id.moistureDownBtn);
-
-
-
+        waterPump = findViewById(R.id.waterPump);
 
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 connectBluetooth();
-
             }
         });
 
@@ -141,6 +135,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        waterPump.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(isChecked){
+                    sendData("W");
+                }
+                else {
+                    // Switch is unchecked
+                    // You can add handling for this scenario if needed
+                }
+            }
+        });
+
     }
 
     private void connectBluetooth() {
@@ -177,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(mUUID);
                 bluetoothSocket.connect();
-                bluetoothButton.setText("Disconnect");
+                bluetoothButton.setText(R.string.disconnect);
                 scanButton.setVisibility(View.GONE);
                 deviceListView.setVisibility(View.GONE);
                 isConnected = true;
@@ -195,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                     bluetoothSocket.close();
                     outputStream = null;
                     showToast("Bluetooth disconnected");
-                    bluetoothButton.setText("Connect to HC-05"); // Change button text to "Connect"
+                    bluetoothButton.setText(R.string.connect_to_hc); // Change button text to "Connect"
                     isConnected = false; // Update connection status
                 }
             } catch (IOException e) {
@@ -210,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             showToast("Bluetooth not supported");
             return;
         }
-
+        
         if (!bluetoothAdapter.isEnabled()) {
             // Check if permission is granted to enable Bluetooth
             if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
@@ -220,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-        System.out.println(bluetoothAdapter.getBondedDevices());
+//        System.out.println(bluetoothAdapter.getBondedDevices());
         ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         deviceListView.setAdapter(deviceAdapter);
 

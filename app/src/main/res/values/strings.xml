@@ -4,4 +4,7 @@
     <string name="scan_for_devices">Scan for Devices</string>
     <string name="connect_to_hc_05">Connect to HC-05</string>
     <string name="seeder">Seeder</string>
+    <string name="connect_to_hc">Connect to HC-05</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="water_pump">Water pump</string>
 </resources>

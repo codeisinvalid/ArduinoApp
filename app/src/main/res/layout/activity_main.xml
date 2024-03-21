@@ -46,7 +46,6 @@
         android:layout_below="@id/scanBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -205,6 +204,21 @@
         android:layout_marginBottom="20dp"
         android:checked="false"
         android:text="@string/seeder"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <Switch
+        android:id="@+id/waterPump"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seeder"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:checked="false"
+        android:text="@string/water_pump"
         android:textSize="24sp"
         android:textStyle="bold"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
