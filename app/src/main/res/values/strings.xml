@@ -7,4 +7,5 @@
     <string name="connect_to_hc">Connect to HC-05</string>
     <string name="disconnect">Disconnect</string>
     <string name="water_pump">Water pump</string>
+    <string name="moisture">Moisture</string>
 </resources>

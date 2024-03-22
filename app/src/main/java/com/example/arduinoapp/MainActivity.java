@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
     OutputStream outputStream;
     Button bluetoothButton, scanButton;
     ListView deviceListView;
-    Switch seedingSwitch,waterPump;
-    AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton, moistureUpBtn, moistureDownBtn;
+    Switch seedingSwitch,waterPump, moistureSwitch;
+    AppCompatImageButton upButton, downButton, leftButton, stopButton, rightButton;
 
     private boolean isConnected = false;
     private static final int REQUEST_ENABLE_BT = 1;
@@ -55,9 +55,8 @@ public class MainActivity extends AppCompatActivity {
         seedingSwitch = findViewById(R.id.seeder);
         scanButton = findViewById(R.id.scanBtn);
         deviceListView = findViewById(R.id.deviceListView);
-        moistureUpBtn = findViewById(R.id.moistureUpBtn);
-        moistureDownBtn = findViewById(R.id.moistureDownBtn);
         waterPump = findViewById(R.id.waterPump);
+        moistureSwitch = findViewById(R.id.moistureSwitch);
 
         bluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,58 +75,56 @@ public class MainActivity extends AppCompatActivity {
         upButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("U");
+                sendData('U');
             }
         });
 
         downButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("D");
+                sendData('D');
             }
         });
 
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("L");
+                sendData('L');
             }
         });
 
         rightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("R");
+                sendData('R');
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData("P");
+                sendData('P');
             }
         });
 
-        moistureUpBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendData("MU");
-            }
-        });
-        moistureDownBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendData("MD");
-            }
-        });
 
+
+        moistureSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked){
+                    sendData('M');
+                }
+
+            }
+        });
 
         seedingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     // Switch is checked, send signal for seeding
-                    sendData("S");
+                    sendData('S');
                 } else {
                     // Switch is unchecked
                     // You can add handling for this scenario if needed
@@ -139,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if(isChecked){
-                    sendData("W");
+                    sendData('W');
                 }
                 else {
                     // Switch is unchecked
@@ -300,10 +297,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void sendData(String data) {
+    private void sendData(char data) {
         if (outputStream != null) {
             try {
-                outputStream.write(data.getBytes());
+                outputStream.write(data);
                 showToast("Data sent: " + data);
             } catch (IOException e) {
                 e.printStackTrace();

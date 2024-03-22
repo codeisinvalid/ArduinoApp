@@ -137,57 +137,27 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <Switch
+        android:id="@+id/moistureSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/controller"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/moistureTv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/moisture_sensor"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/moistureUpBtn"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:contentDescription="@string/app_name"
-            android:layout_margin="20sp"
-            android:background="@drawable/keys_bg"
-            android:scaleType="fitCenter"
-            android:src="@drawable/up_button" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/moistureDownBtn"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:contentDescription="@string/app_name"
-            android:layout_margin="20sp"
-            android:background="@drawable/keys_bg"
-            android:scaleType="fitCenter"
-            android:src="@drawable/down_button" />
-
-
-    </LinearLayout>
-
+        android:checked="false"
+        android:text="@string/moisture"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
 
     <TextView
         android:id="@+id/moisture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/linearLayout"
+        android:layout_below="@id/moistureSwitch"
         android:layout_centerHorizontal="true"
         android:textStyle="bold"
         android:textSize="18sp"
